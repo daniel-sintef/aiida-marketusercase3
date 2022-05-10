@@ -1,100 +1,116 @@
-""" Helper functions for automatically setting up computer & code.
-Helper functions for setting up
+import math 
+from aiida_marketusercase3.templates import *
 
- 1. An AiiDA localhost computer
- 2. A "diff" code on localhost
+################## Consider moving these into a 'constants' file or something... ########################
+rhoXylene = 864
+rhoATSB = 967
+mwATSB = 249.35
+dnozzle = 0.0008
+mwO2 = 32
+sigmaATSB = 0.0303
+sigmaXylene = 0.0282
+myATSB = 1.8
+myXylene = 0.0006475
+gap_inner_diameter = 0.0017
+gap_outer_diameter = 0.0024
+mwMethane = 16.04
+mwAir = 28.96
+atm  = 101325
+rgas = 8.314
+Tref = 298.15
+########################################################################################################
 
-Note: Point 2 is made possible by the fact that the ``diff`` executable is
-available in the PATH on almost any UNIX system.
-"""
-import shutil
-import tempfile
+def prepare_inputs(user_input):
+    inputs = {}
+    inputs['PilotMethaneVolumeFlowRate'] = user_input['Pilotch4fr']
+    inputs['PilotOxygenVolumeFlowRate'] =  user_input['Piloto2fr']
+    inputs['DispersionVolumeFlowRate'] = user_input['Dispfr']
+    inputs['FanExtractionVolumeFlowRate'] = user_input['Fanrate']
+    inputs['PreCursorVolumeFlowRate'] = user_input['Precurfr']
+    inputs['ATSBConcentration'] = user_input['ATSBcons']
+    
+    # this is from model3, but i've added it to make the c-header part work...
+    inputs['ActiveSurfaceArea'] =  user_input['A0']
+    inputs['PalladiumMassFraction'] =  user_input['X_pd']
+    inputs['ActivationEnergy'] =  user_input['Ea']
+    inputs['CatalystSupportMacroPorosity'] =  user_input['por_cat']
+    inputs['MacroporeTortuosity'] =  user_input['tort']
+    inputs['MacroPoreAverageRadius'] =  user_input['rp']
+    
+    alphaATSB   = inputs['ATSBConcentration']*mwATSB/rhoATSB
+    rhomix      = alphaATSB*rhoATSB+(1.0-alphaATSB)*rhoXylene
+    ATSBmf      = alphaATSB*rhoATSB/(alphaATSB*rhoATSB + (1.0-alphaATSB)*rhoXylene)
+    Xylenemf    = 1.0 - ATSBmf
+    sigmaprec   = sigmaATSB*ATSBmf + (1.0-ATSBmf)*sigmaXylene
+    Precmfr     = inputs['PreCursorVolumeFlowRate']/1000.0/1000.0/60.0*rhomix
+    Precvel     = inputs['PreCursorVolumeFlowRate']/1000.0/1000.0/60.0/(math.pi/4.0*dnozzle**2)
+    Dispmfr     = mwO2*atm*(inputs['DispersionVolumeFlowRate']/1000.0/60.)/rgas/Tref/1000.0
+    myprec      = math.exp(ATSBmf*math.log(myATSB)+Xylenemf*math.log(myXylene)-11.24*ATSBmf*Xylenemf)
+    Dispgapa    = math.pi/4.0*(gap_outer_diameter**2-gap_inner_diameter**2)
+    Dispgavel   = inputs['DispersionVolumeFlowRate']/1000.0/60.0/Dispgapa
+    Re          = rhomix*(Dispgavel - Precvel)*dnozzle/myprec
+    We          = rhomix*(Dispgavel-Precvel)**2*dnozzle/sigmaprec
+    Pilotch4mfr = mwMethane*atm*(inputs['PilotMethaneVolumeFlowRate']/1000.0/60.0)/rgas/Tref/1000.0
+    PilotO2mfr  = mwO2*atm*(inputs['PilotOxygenVolumeFlowRate']/1000.0/60.0)/rgas/Tref/1000.0
+    Dropsmd     = 51.0*dnozzle*Re**(-0.39)*We**(-0.18)*(Precmfr/Dispmfr)**0.29
+    Pilotmfr    = Pilotch4mfr + PilotO2mfr
+    Pilotch4mf  = Pilotch4mfr/Pilotmfr
+    Piloto2mf   = 1.0 - Pilotch4mf
+    Fanextrate  = inputs['FanExtractionVolumeFlowRate']*(atm*mwAir/rgas/Tref/1000.0)/3600.0
+    
+    # originally these were all stored in an 'outputs' dictionary 
+    inputs['ATSBMassFraction'] = ATSBmf
+    inputs['XyleneMassFraction'] = Xylenemf
+    inputs['PreCursorMassFlowRate'] = Precmfr
+    inputs['PreCursorVelocity'] = Precvel
+    inputs['DispersionMassFlowRate'] = Dispmfr
+    inputs['DropletSauterMeanDiameter'] = Dropsmd
+    inputs['PilotMassFlowRate'] = Pilotmfr
+    inputs['PilotMethaneMassFlowRate'] = Pilotch4mf
+    inputs['PilotOxygenMassFlowRate'] = Piloto2mf
+    inputs['FanExtractionMassFlowRate'] = Fanextrate
+    return inputs
 
-from aiida.common.exceptions import NotExistent
-from aiida.orm import Code, Computer
-
-LOCALHOST_NAME = "localhost-test"
-
-executables = {
-    "marketusercase3": "diff",
-}
-
-
-def get_path_to_executable(executable):
-    """Get path to local executable.
-    :param executable: Name of executable in the $PATH variable
-    :type executable: str
-    :return: path to executable
-    :rtype: str
+def write_journalfile(inputs, fileout):
     """
-    path = shutil.which(executable)
-    if path is None:
-        raise ValueError(f"'{executable}' executable not found in PATH.")
-    return path
-
-
-def get_computer(name=LOCALHOST_NAME, workdir=None):
-    """Get AiiDA computer.
-    Loads computer 'name' from the database, if exists.
-    Sets up local computer 'name', if it isn't found in the DB.
-
-    :param name: Name of computer to load or set up.
-    :param workdir: path to work directory
-        Used only when creating a new computer.
-    :return: The computer node
-    :rtype: :py:class:`aiida.orm.computers.Computer`
+    replace the calculated values in the template by mapping the variables in
+    the journal template to concepts in the ontology
     """
-
-    try:
-        computer = Computer.objects.get(label=name)
-    except NotExistent:
-        if workdir is None:
-            workdir = tempfile.mkdtemp()
-
-        computer = Computer(
-            label=name,
-            description="localhost computer set up by aiida_diff tests",
-            hostname=name,
-            workdir=workdir,
-            transport_type="local",
-            scheduler_type="direct",
-        )
-        computer.store()
-        computer.set_minimum_job_poll_interval(0.0)
-        computer.configure()
-
-    return computer
-
-
-def get_code(entry_point, computer):
-    """Get local code.
-    Sets up code for given entry point on given computer.
-
-    :param entry_point: Entry point of calculation plugin
-    :param computer: (local) AiiDA computer
-    :return: The code node
-    :rtype: :py:class:`aiida.orm.nodes.data.code.Code`
+    out = journal_template.format(ATSBmf=inputs['ATSBMassFraction'], 
+                         Xylenemf=inputs['XyleneMassFraction'], 
+                         Precmfr=inputs['PreCursorMassFlowRate'], 
+                         Precvel=inputs['PreCursorVelocity'], 
+                         Dispmfr=inputs['DispersionMassFlowRate'], 
+                         Dropsmd=inputs['DropletSauterMeanDiameter'], 
+                         Pilotmfr=inputs['PilotMassFlowRate'], 
+                         Pilotch4mf=inputs['PilotMethaneMassFlowRate'], 
+                         Piloto2mf=inputs['PilotOxygenMassFlowRate'], 
+                         Fanextrate=inputs['FanExtractionMassFlowRate'])
     """
+    Write the new journal file to disk
+    """
+    fileout.write(out)
+    return
 
-    try:
-        executable = executables[entry_point]
-    except KeyError as exc:
-        raise KeyError(
-            "Entry point '{}' not recognized. Allowed values: {}".format(
-                entry_point, list(executables.keys())
-            )
-        ) from exc
 
-    codes = Code.objects.find(  # pylint: disable=no-member
-        filters={"label": executable}
-    )
-    if codes:
-        return codes[0]
 
-    path = get_path_to_executable(executable)
-    code = Code(
-        input_plugin_name=entry_point,
-        remote_computer_exec=[computer, path],
-    )
-    code.label = executable
-    return code.store()
+def write_header(inputs, fileout):
+    template = open("catalystmodeltemplate.txt", "r").read()
+    """
+    replace the calculated values in the template by mapping the variables in
+    the journal template to concepts in the ontology
+    """
+    out = header_template.format(A0=inputs['ActiveSurfaceArea'], 
+                         X_pd=inputs['PalladiumMassFraction'], 
+                         Ea=inputs['ActivationEnergy'], 
+                         por_cat=inputs['CatalystSupportMacroPorosity'], 
+                         tort=inputs['MacroporeTortuosity'], 
+                         rp=inputs['MacroPoreAverageRadius'], 
+                         k0=10000.0) #Not ontologized yet
+
+
+    """
+    Write the new header file to disk
+    """
+    fileout.write(out)
+    return
