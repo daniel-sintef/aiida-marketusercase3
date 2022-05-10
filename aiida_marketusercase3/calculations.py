@@ -28,6 +28,12 @@ class MarketPlaceUsercase3Model3Calc(CalcJob):
                                             'num_mpiprocs_per_machine': 1,
                                             }
         spec.inputs['metadata']['options']['parser_name'].default = 'marketusercase3'
+        spec.input(
+            "cas_file", valid_type=SinglefileData, help="Cas file"
+        )
+        spec.input(
+            "dat_file", valid_type=SinglefileData, help="Dat file"
+        )
         spec.output(
             'output',
             valid_type=ArrayData,
@@ -67,7 +73,18 @@ class MarketPlaceUsercase3Model3Calc(CalcJob):
         calcinfo = datastructures.CalcInfo()
         calcinfo.codes_info = [codeinfo]
         
-        #calcinfo.local_copy_list = [] # files would go here
+        calcinfo.local_copy_list = [
+            (
+                self.inputs.cas_file.uuid,
+                self.inputs.cas_file.filename,
+                self.inputs.cas_file.filename,
+            ),
+            (
+                self.inputs.dat_file.uuid,
+                self.inputs.dat_file.filename,
+                self.inputs.dat_file.filename,
+            ),
+        ]
         calcinfo.retrieve_list = [('outputmodel*/*out','.',1)] 
 
         return calcinfo
