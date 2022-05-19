@@ -60,8 +60,8 @@ class MarketPlaceUsercase3Model3Calc(CalcJob):
         with folder.open("Pythongenerated.jou", 'w') as fileout:
             write_journalfile(write_inputs, fileout)
 
-        with folder.open("calc.h", 'w') as fileout:
-            write_header(write_inputs, fileout)
+#        with folder.open("calc.h", 'w') as fileout:
+#            write_header(write_inputs, fileout)
 
 
 
@@ -85,7 +85,8 @@ class MarketPlaceUsercase3Model3Calc(CalcJob):
                 self.inputs.dat_file.filename,
             ),
         ]
-        calcinfo.retrieve_list = [('outputmodel*/*out','.',1)] 
+        calcinfo.retrieve_list = [('Model/*','.',0),
+                                  ('Output/*','.',0)] 
 
         return calcinfo
 

@@ -29,13 +29,13 @@ def prepare_inputs(user_input):
     inputs['PreCursorVolumeFlowRate'] = user_input['Precurfr']
     inputs['ATSBConcentration'] = user_input['ATSBcons']
     
-    # this is from model3, but i've added it to make the c-header part work...
-    inputs['ActiveSurfaceArea'] =  user_input['A0']
-    inputs['PalladiumMassFraction'] =  user_input['X_pd']
-    inputs['ActivationEnergy'] =  user_input['Ea']
-    inputs['CatalystSupportMacroPorosity'] =  user_input['por_cat']
-    inputs['MacroporeTortuosity'] =  user_input['tort']
-    inputs['MacroPoreAverageRadius'] =  user_input['rp']
+    ## this is from model3, but i've added it to make the c-header part work...
+    #inputs['ActiveSurfaceArea'] =  user_input['A0']
+    #inputs['PalladiumMassFraction'] =  user_input['X_pd']
+    #inputs['ActivationEnergy'] =  user_input['Ea']
+    #inputs['CatalystSupportMacroPorosity'] =  user_input['por_cat']
+    #inputs['MacroporeTortuosity'] =  user_input['tort']
+    #inputs['MacroPoreAverageRadius'] =  user_input['rp']
     
     alphaATSB   = inputs['ATSBConcentration']*mwATSB/rhoATSB
     rhomix      = alphaATSB*rhoATSB+(1.0-alphaATSB)*rhoXylene
@@ -95,7 +95,7 @@ def write_journalfile(inputs, fileout):
 
 
 def write_header(inputs, fileout):
-    template = open("catalystmodeltemplate.txt", "r").read()
+    header_template
     """
     replace the calculated values in the template by mapping the variables in
     the journal template to concepts in the ontology

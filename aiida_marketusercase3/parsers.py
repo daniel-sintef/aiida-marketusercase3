@@ -13,19 +13,6 @@ import numpy as np
 
 UserCase3Calc = CalculationFactory("marketusercase3")
 
-#    lo1 = pd.read_csv("outputmodel3/Monitor-Catalyst-LO1_7.out", delim_whitespace=True, skiprows=3, usecols=[2,4], header=None)
-#    lo2 = pd.read_csv("outputmodel3/Monitor-Catalyst-LO2_7.out", delim_whitespace=True, skiprows=3, usecols=[2,4], header=None)
-#    lo3 = pd.read_csv("outputmodel3/Monitor-Catalyst-LO3_7.out", delim_whitespace=True, skiprows=3, usecols=[2,4], header=None)
-#    lo1.columns=['t','ch4']
-#    lo2.columns=['t','ch4']
-#    lo3.columns=['t','ch4']
-#    outputs['Lightoff1Temperature'].set(lo1.t.to_numpy(),'K')
-#    outputs['Lightoff1MethaneMassFraction'].set(lo1.ch4.to_numpy(),'-')
-#    outputs['Lightoff2Temperature'].set(lo2.t.to_numpy(),'K')
-#    outputs['Lightoff2MethaneMassFraction'].set(lo2.ch4.to_numpy(),'-')
-#    outputs['Lightoff3Temperature'].set(lo3.t.to_numpy(),'K')
-#    outputs['Lightoff3MethaneMassFraction'].set(lo3.ch4.to_numpy(),'-')
-
 class UserCase3Parser(Parser):
     """
     Parser class for parsing output of calculation.
@@ -56,9 +43,7 @@ class UserCase3Parser(Parser):
 
          # Check that folder content is as expected
         files_retrieved = self.retrieved.list_object_names()
-        files_expected = ["Monitor-Catalyst-LO1_7.out",
-                          "Monitor-Catalyst-LO2_7.out",
-                          "Monitor-Catalyst-LO2_7.out" ]
+        files_expected = ["Monitor_progress-FSP-Lurederra_alumina.out"]
         # Note: set(A) <= set(B) checks whether A is a subset of B
         if not set(files_expected) <= set(files_retrieved):
             self.logger.error(
@@ -73,36 +58,22 @@ class UserCase3Parser(Parser):
         # self.out("marketusercase3", output_node)
 
 
-        with self.retrieved.open("Monitor-Catalyst-LO1_7.out") as fh:
-            lo1 = pd.read_csv(fh,
+        with self.retrieved.open("Monitor_progress-FSP-Lurederra_alumina.out") as fh:
+            monitor_results = pd.read_csv(fh,
                               delim_whitespace=True,
                               skiprows=3,
-                              usecols=[2,4],
+                              usecols=[2,3],
                               header=None)
-        with self.retrieved.open("Monitor-Catalyst-LO2_7.out") as fh:
-            lo2 = pd.read_csv(fh,
-                              delim_whitespace=True,
-                              skiprows=3,
-                              usecols=[2,4],
-                              header=None)
-        with self.retrieved.open("Monitor-Catalyst-LO3_7.out") as fh:
-            lo3 = pd.read_csv(fh,
-                              delim_whitespace=True,
-                              skiprows=3,
-                              usecols=[2,4],
-                              header=None)
-        lo1.columns=['t','ch4']
-        lo2.columns=['t','ch4']
-        lo3.columns=['t','ch4']
+        monitor_results.columns=['particle_area_flow',
+                                 'particle_volume_flow']
+        monitor_results['final_result'] = 6*1e9*monitor_results['particle_volume_flow'] / \
+                                                monitor_results['particle_area_flow']
         
         results = ArrayData()
         
-        results.set_array('Lightoff1Temperature', lo1.t.to_numpy())
-        results.set_array('Lightoff1MethaneMassFraction', lo1.ch4.to_numpy())
-        results.set_array('Lightoff2Temperature', lo2.t.to_numpy())
-        results.set_array('Lightoff2MethaneMassFraction', lo2.ch4.to_numpy())
-        results.set_array('Lightoff3Temperature', lo3.t.to_numpy())
-        results.set_array('Lightoff3MethaneMassFraction', lo3.ch4.to_numpy())
+        results.set_array('final_result', monitor_results.final_result.to_numpy())
+        results.set_array('particle_volume_flow', monitor_results.particle_volume_flow.to_numpy())
+        results.set_array('particle_area_flow', monitor_results.particle_area_flow.to_numpy())
         self.out("output", results)
 
         return ExitCode(0)
