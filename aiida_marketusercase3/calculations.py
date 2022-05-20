@@ -85,7 +85,7 @@ class MarketPlaceUsercase3Model3Calc(CalcJob):
                 self.inputs.dat_file.filename,
             ),
         ]
-        calcinfo.retrieve_list = [('Model/*','.',0),
+        calcinfo.retrieve_list = [('Monitor/*','.',0),
                                   ('Output/*','.',0)] 
 
         return calcinfo
