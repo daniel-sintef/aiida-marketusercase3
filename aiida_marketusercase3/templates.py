@@ -40,4 +40,6 @@ journal_template ="""/file/read-case-data FSP-Lurederra_alumina-end
 /solve/dual-time-iterate 20 10
 
 /file/write-case-data FSP-Lurederra_alumina-end2
+/report/surface-integrals/flow-rate 5 () udm-33 yes "./Output/FSP-Lurederra_alumina-particle_volume_flux.srp"
+/report/surface-integrals/flow-rate 5 () udm-32 yes "./Output/FSP-Lurederra_alumina-particle_area_flux.srp"
 """
