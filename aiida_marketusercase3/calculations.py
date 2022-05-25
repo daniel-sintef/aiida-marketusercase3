@@ -53,11 +53,12 @@ class MarketPlaceUsercase3Model3Calc(CalcJob):
         """
         codeinfo = datastructures.CodeInfo()
         user_inputs = self.inputs.user_inputs
-        
+
+        journal_filename ="Pythongenerated.jou" 
         # maybe later this can be made into an ontology step...
         write_inputs = prepare_inputs(user_inputs)
 
-        with folder.open("Pythongenerated.jou", 'w') as fileout:
+        with folder.open(journal_filename, 'w') as fileout:
             write_journalfile(write_inputs, fileout)
 
 #        with folder.open("calc.h", 'w') as fileout:
@@ -67,6 +68,7 @@ class MarketPlaceUsercase3Model3Calc(CalcJob):
 
         codeinfo = datastructures.CodeInfo()
         codeinfo.code_uuid = self.inputs.code.uuid
+        codeinfo.cmdline_params = ['2ddp', '-t20', '-gu', '-i', journal_filename]
         #codeinfo.stdout_name = self.metadata.options.output_filename
 
         # Prepare a `CalcInfo` to be returned to the engine
