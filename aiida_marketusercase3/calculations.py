@@ -88,7 +88,7 @@ class MarketPlaceUsercase3Model3Calc(CalcJob):
         #    ),
         #]
 
-        calcinfo.retrieve_list = [('Monitor/*','.',0),
+        calcinfo.retrieve_list = [('Monitors/*','.',0),
                                   ('Output/*','.',0)] 
 
         return calcinfo
