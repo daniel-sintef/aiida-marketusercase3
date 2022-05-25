@@ -68,7 +68,7 @@ class MarketPlaceUsercase3Model3Calc(CalcJob):
 
         codeinfo = datastructures.CodeInfo()
         codeinfo.code_uuid = self.inputs.code.uuid
-        codeinfo.cmdline_params = ['2ddp', '-t20', '-gu', '-i', journal_filename]
+        codeinfo.cmdline_params = ['2ddp', '-t20', '-g', '-i', journal_filename]
         #codeinfo.stdout_name = self.metadata.options.output_filename
 
         # Prepare a `CalcInfo` to be returned to the engine

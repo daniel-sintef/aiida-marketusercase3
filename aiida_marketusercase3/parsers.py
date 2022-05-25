@@ -61,7 +61,7 @@ class UserCase3Parser(Parser):
 
         with self.retrieved.open(particle_area_file) as fh:
             area_file_data = pd.read_csv(fh,skiprows = 5, delim_whitespace = True)
-        with self.retrieved.open(volume_file_data) as fh:
+        with self.retrieved.open(particle_volume_file) as fh:
             volume_file_data = pd.read_csv(fh,skiprows = 5, delim_whitespace = True)
         volume_value = float(volume_file_data.columns[1])
         area_value = float(area_file_data.columns[1])
