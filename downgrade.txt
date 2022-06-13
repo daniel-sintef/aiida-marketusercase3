@@ -1,0 +1,31 @@
+* You will need to change your AIIDA_PATH, otherwise it will find the 'newer' config.json and crash
+
+$export AIIDA_PATH=/my/new/path
+
+* vscode can be rather stupid in selecting the virtualenv, you may find your original config.json overwritten
+  if that happens, go into $AIIDA_PATH/.aiida, and copy an older config.json over [you can check for one with version=5]
+
+* You will need to have the 'right' versions of certain libraries, e.g., MarkupSafe, Jupyter
+  This 'should' be handled by the modified requiremnts file, but errors may occurr..
+
+* Because this is AiiDA < 2.0, you need to run reentry scan after creating a plugin
+
+$reentry scan 
+
+* You will then also need to set up jupyter manually (in a way you don't for aiida>2.0) 
+https://aiida.readthedocs.io/projects/aiida-core/en/v1.6.5/intro/installation.html
+
+Copy the following to <home_folder>/.ipython/profile_default/startup/aiida_magic_register.py
+if __name__ == '__main__':
+
+    try:
+        import aiida
+        del aiida
+    except ImportError:
+        # AiiDA is not installed in this Python environment
+        pass
+    else:
+        from aiida.tools.ipython.ipython_magics import register_ipython_extension
+        register_ipython_extension() 
+
+* remove %load_ext aiida, you only need %aiida after writing the code above
