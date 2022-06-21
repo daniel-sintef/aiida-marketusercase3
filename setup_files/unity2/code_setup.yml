@@ -2,7 +2,12 @@ label: "FSP"
 description: "Flame spray code "
 input_plugin: "marketusercase3"
 on_computer: true
-remote_abs_path: "/home/{username}/marketplace_uc3/run_model3.sh"
-computer: "unity2_v1"
-prepend_text: " "
+remote_abs_path: "/share/apps/modulessoftware/ansys_inc/v201/fluent/bin/fluent"
+computer: "unity2"
+prepend_text: |
+ module purge
+ module load fluent/2020R1
+ export FLUENT_GUI=off
+
+ cp -r /work/kurianv/MarketPlace/Aiida-files-test/Final_A1flame/* ./
 append_text: " "
