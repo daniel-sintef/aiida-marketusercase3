@@ -1,8 +1,0 @@
-label: "test-mpuc3-model3"
-description: "Local test for model3 "
-input_plugin: "marketusercase3"
-on_computer: true
-remote_abs_path: "/home/kurianv/aiida-marketusercase3/examples/run_model3.sh"
-computer: "auto_mpuc3"
-prepend_text: " "
-append_text: " "
