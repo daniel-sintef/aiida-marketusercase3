@@ -24,10 +24,6 @@ requires-python = ">=3.7"
 dependencies = [
     "aiida-core>=1.6.5,<2",
     "voluptuous",
-    "MarkupSafe==2.0.1",
-    "jupyter-client~=6.1,<6.1.13",
-    "jupyter~=1.0",
-    "pandas"
 ]
 
 [project.urls]
