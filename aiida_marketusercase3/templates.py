@@ -17,7 +17,7 @@ header_template = """#include "udf.h"
 #define rp {rp}						/* ***USER INPUT*** Macropore average radius (nm)*/
 """
 
-journal_template ="""/file/read-case-data FSP-Lurederra_alumina-end
+journal_template = """/file/read-case-data FSP-Lurederra_alumina-end
 /file/read-macros "postintime-FSP-Lurederra_alumina.scm"
 (rpsetvar 'flow-time 0)
 (rpsetvar 'time-step 0)
@@ -32,7 +32,7 @@ journal_template ="""/file/read-case-data FSP-Lurederra_alumina-end
 /define/boundary-conditions/mass-flow-inlet pilot_fuel yes yes no {Pilotmfr} no 300 no 0 no yes no no yes 5 10 no no 0 no {Pilotch4mf} no 0 no {Piloto2mf} no 0 no 0 no 0 yes no 1 no yes no yes no yes yes yes "udf" "N_boundary::FSP" yes yes "udf" "A_boundary::FSP" yes yes "udf" "V_boundary::FSP" no yes
 ;                                                                mass flow rate                                     CH4 mass fraction  O2 mass fraction
 /define/boundary-conditions/mass-flow-outlet outlet yes yes no {Fanextrate} no yes 300 no 1 no yes no yes no yes yes yes "udf" "N_boundary::FSP" yes yes "udf" "A_boundary::FSP" yes yes "udf" "V_boundary::FSP" no
-;                                                            mass flow rate  
+;                                                            mass flow rate
 
 
 /solve/set/max-flow-time 1e-4

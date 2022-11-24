@@ -10,9 +10,9 @@ $export AIIDA_PATH=/my/new/path
 
 * Because this is AiiDA < 2.0, you need to run reentry scan after creating a plugin
 
-$reentry scan 
+$reentry scan
 
-* You will then also need to set up jupyter manually (in a way you don't for aiida>2.0) 
+* You will then also need to set up jupyter manually (in a way you don't for aiida>2.0)
 https://aiida.readthedocs.io/projects/aiida-core/en/v1.6.5/intro/installation.html
 
 Copy the following to <home_folder>/.ipython/profile_default/startup/aiida_magic_register.py
@@ -26,6 +26,6 @@ if __name__ == '__main__':
         pass
     else:
         from aiida.tools.ipython.ipython_magics import register_ipython_extension
-        register_ipython_extension() 
+        register_ipython_extension()
 
 * remove %load_ext aiida, you only need %aiida after writing the code above
