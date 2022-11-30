@@ -7,7 +7,7 @@ import json
 
 from aiida.common import datastructures
 from aiida.engine import CalcJob
-from aiida.orm import ArrayData, Dict, SinglefileData
+from aiida.orm import ArrayData, Dict, SinglefileData, Str
 
 from aiida_marketusercase3.helpers import *
 
@@ -25,6 +25,7 @@ class MarketPlaceUsercase3Model3Calc(CalcJob):
         spec.input('user_inputs', valid_type=Dict, help='User inputs to the plugin')
         # if we want to get fancy, we can create a custom Dict object
         # which can auto-validate the inputs
+        spec.input('job_uuid', valid_type=Str, help='A UUID to coordinate file transport.')
 
         spec.inputs['metadata']['options']['resources'].default = {
                                             'num_machines': 1,
@@ -60,6 +61,7 @@ class MarketPlaceUsercase3Model3Calc(CalcJob):
         input_json ="inputs.json"
         with folder.open(input_json, 'w') as fh:
             json.dump(user_inputs, fh)
+
 
         codeinfo = datastructures.CodeInfo()
         codeinfo.code_uuid = self.inputs.code.uuid
@@ -176,12 +178,14 @@ class DummyMarketPlaceUsercase3Model3Calc(CalcJob):
     def define(cls, spec):
         """Define inputs and outputs of the calculation."""
         # yapf: disable
-        super(MarketPlaceUsercase3Model3Calc, cls).define(spec)
+        super().define(spec)
+        #super(MarketPlaceUsercase3Model3Calc, cls).define(spec)
 
         # new ports
         spec.input('user_inputs', valid_type=Dict, help='User inputs to the plugin')
         # if we want to get fancy, we can create a custom Dict object
         # which can auto-validate the inputs
+        spec.input('job_uuid', valid_type=Str, help='User inputs to the plugin')
 
         spec.inputs['metadata']['options']['resources'].default = {
                                             'num_machines': 1,
@@ -213,43 +217,24 @@ class DummyMarketPlaceUsercase3Model3Calc(CalcJob):
         """
         codeinfo = datastructures.CodeInfo()
         user_inputs = self.inputs.user_inputs
+        with folder.open('inputs.json', 'w') as fh:
+            json.dump(dict(user_inputs), fh)
 
-        journal_filename ="Pythongenerated.jou"
-        # maybe later this can be made into an ontology step...
-        write_inputs = prepare_inputs(user_inputs)
-
-        with folder.open(journal_filename, 'w') as fileout:
-            write_journalfile(write_inputs, fileout)
-
-#        with folder.open("calc.h", 'w') as fileout:
-#            write_header(write_inputs, fileout)
+        job_uuid = self.inputs.job_uuid
+        job_uuid_file = "JOB_UUID"
+        with folder.open(job_uuid_file, 'w') as fh:
+            fh.write(job_uuid.value)
+            #json.dump(str(job_uuid.value.replace('"','')), fh)
 
 
 
         codeinfo = datastructures.CodeInfo()
         codeinfo.code_uuid = self.inputs.code.uuid
-        codeinfo.cmdline_params = ['2ddp', '-g', '-slurm', '-pinfiniband', '-t20', '-i', journal_filename]
-        #codeinfo.stdout_name = self.metadata.options.output_filename
 
-        # Prepare a `CalcInfo` to be returned to the engine
         calcinfo = datastructures.CalcInfo()
         calcinfo.codes_info = [codeinfo]
 
-        #calcinfo.local_copy_list = [
-        #    (
-        #        self.inputs.cas_file.uuid,
-        #        self.inputs.cas_file.filename,
-        #        self.inputs.cas_file.filename,
-        #    ),
-        #    (
-        #        self.inputs.dat_file.uuid,
-        #        self.inputs.dat_file.filename,
-        #        self.inputs.dat_file.filename,
-        #    ),
-        #]
-
-        calcinfo.retrieve_list = [('Monitors/*','.',0),
-                                  ('Output/*','.',0)]
+        calcinfo.retrieve_list = [('results.json')]
 
         return calcinfo
 

@@ -137,7 +137,7 @@ class DummyUserCase3Parser(Parser):
 
         volume_value = result_dict["volume_value"]
         area_value = result_dict["area_value"]
-        particle_size = result_dict["particule_size"]
+        particle_size = result_dict["particle_size"]
 
         results = ArrayData()
         results.set_array("volume_flux", np.array(volume_value))

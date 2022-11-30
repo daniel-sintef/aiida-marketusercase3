@@ -54,9 +54,11 @@ docs = [
 
 [project.entry-points."aiida.calculations"]
 "marketusercase3" = "aiida_marketusercase3.calculations:MarketPlaceUsercase3Model3Calc"
+"dummy_marketuc3" = "aiida_marketusercase3.calculations:DummyMarketPlaceUsercase3Model3Calc"
 
 [project.entry-points."aiida.parsers"]
 "marketusercase3" = "aiida_marketusercase3.parsers:UserCase3Parser"
+"dummy_marketuc3" = "aiida_marketusercase3.parsers:DummyUserCase3Parser"
 
 [project.entry-points."aiida.cmdline.data"]
 "marketusercase3" = "aiida_marketusercase3.cli:data_cli"
