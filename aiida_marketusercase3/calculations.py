@@ -191,7 +191,7 @@ class DummyMarketPlaceUsercase3Model3Calc(CalcJob):
                                             'num_machines': 1,
                                             'num_mpiprocs_per_machine': 1,
                                             }
-        spec.inputs['metadata']['options']['parser_name'].default = 'marketusercase3'
+        spec.inputs['metadata']['options']['parser_name'].default = 'dummy_marketuc3'
         #spec.input(
         #    "cas_file", valid_type=SinglefileData, help="Cas file"
         #)
