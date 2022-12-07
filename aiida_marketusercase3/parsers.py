@@ -94,6 +94,7 @@ class UserCase3Parser(Parser):
         return ExitCode(0)
 
 
+DummyUserCase3Calc = CalculationFactory("dummy_marketuc3")
 class DummyUserCase3Parser(Parser):
     """
     Dummy parser that only reads output json files form other plugins
@@ -109,8 +110,8 @@ class DummyUserCase3Parser(Parser):
         :param type node: :class:`aiida.orm.nodes.process.process.ProcessNode`
         """
         super().__init__(node)
-        if not issubclass(node.process_class, UserCase3Calc):
-            raise exceptions.ParsingError("Can only parse UserCase3 calculations")
+        if not issubclass(node.process_class, DummyUserCase3Calc):
+            raise exceptions.ParsingError("Can only parse Dummy-UserCase3 calculations")
 
     def parse(self, **kwargs):
         """
@@ -135,13 +136,13 @@ class DummyUserCase3Parser(Parser):
         with self.retrieved.open(result_json) as fh:
             result_dict = json.load(fh)
 
-        volume_value = result_dict["volume_value"]
-        area_value = result_dict["area_value"]
+        volume_flux = result_dict["volume_flux"]
+        area_flux = result_dict["area_flux"]
         particle_size = result_dict["particle_size"]
 
         results = ArrayData()
-        results.set_array("volume_flux", np.array(volume_value))
-        results.set_array("area_flux", np.array(area_value))
+        results.set_array("volume_flux", np.array(volume_flux))
+        results.set_array("area_flux", np.array(area_flux))
         results.set_array("particle_size", np.array(particle_size))
         self.out("output", results)
 
