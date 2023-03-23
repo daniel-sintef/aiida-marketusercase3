@@ -149,7 +149,7 @@ class DummyUserCase3Parser(Parser):
 
         results = ArrayData()
         for key in result_dict:
-            results.set_array(key, np.array(results[key]))
+            results.set_array(key, np.array(result_dict[key]))
 
         self.out("output", results)
 
