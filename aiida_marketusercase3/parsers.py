@@ -95,6 +95,8 @@ class UserCase3Parser(Parser):
 
 
 DummyUserCase3Calc = CalculationFactory("dummy_marketuc3")
+
+
 class DummyUserCase3Parser(Parser):
     """
     Dummy parser that only reads output json files form other plugins
@@ -136,14 +138,19 @@ class DummyUserCase3Parser(Parser):
         with self.retrieved.open(result_json) as fh:
             result_dict = json.load(fh)
 
-        volume_flux = result_dict["volume_flux"]
-        area_flux = result_dict["area_flux"]
-        particle_size = result_dict["particle_size"]
+        # volume_flux = result_dict["volume_flux"]
+        # area_flux = result_dict["area_flux"]
+        # particle_size = result_dict["particle_size"]
+
+        # results = ArrayData()
+        # results.set_array("volume_flux", np.array(volume_flux))
+        # results.set_array("area_flux", np.array(area_flux))
+        # results.set_array("particle_size", np.array(particle_size))
 
         results = ArrayData()
-        results.set_array("volume_flux", np.array(volume_flux))
-        results.set_array("area_flux", np.array(area_flux))
-        results.set_array("particle_size", np.array(particle_size))
+        for key in result_dict:
+            results.set_array(key, np.array(results[key]))
+
         self.out("output", results)
 
         return ExitCode(0)
